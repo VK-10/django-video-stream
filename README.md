@@ -2,6 +2,9 @@
 
 A Django-based video streaming backend that accepts video uploads, processes them into adaptive HLS (HTTP Live Streaming) streams using FFmpeg, and serves multiple quality variants (144p, 360p, 720p) via a REST API.
 
+Video Link - https://drive.google.com/file/d/1U7L-sOcwqD50Krqxjc3MO9J9K4d0J3kY/view?usp=drive_link
+
+Righnt now working on playlist feed, auth and deploying the video into s3/cdn storage
 ---
 
 ## Architecture Overview
