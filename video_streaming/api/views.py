@@ -5,6 +5,9 @@ import uuid
 from uuid import uuid4
 from django.shortcuts import render
 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 # Create your views here.
 from django.http import JsonResponse
@@ -18,6 +21,9 @@ from rest_framework.views import APIView
 
 
 class VideoView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     ""
     parser_classes = [MultiPartParser, FormParser]
 

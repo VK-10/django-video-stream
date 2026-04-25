@@ -22,7 +22,7 @@ def ffmpeg_command (quality_string, video_path, output_path) :
         # 144p.m3u8
 
     elif quality_string == "360p":
-        [
+        return [
     'ffmpeg', '-i', video_path,
     '-vf', 'scale=-2:360',
     '-codec:v', 'libx264', '-b:v', '800k',
@@ -35,7 +35,7 @@ def ffmpeg_command (quality_string, video_path, output_path) :
 ]
     
     elif quality_string == "720p":
-        [
+        return [
     'ffmpeg', '-i', video_path,
     '-vf', 'scale=-2:720',
     '-codec:v', 'libx264', '-b:v', '2500k',

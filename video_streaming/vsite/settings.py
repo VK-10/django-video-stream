@@ -10,6 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+
+
+from datetime import timedelta
 from pathlib import Path
 import os
 
@@ -31,6 +34,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'accounts.User'
+
 
 # Application definition
 
@@ -47,6 +52,9 @@ INSTALLED_APPS = [
     'workers',
     'celery',
     'rest_framework',
+    'accounts',
+    'rest_framework_simplejwt.token_blacklist',
+    
 ]
 
 MIDDLEWARE = [
@@ -54,14 +62,14 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 # # Allow all origins (dev)
-# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Or specify origins (prod)
 CORS_ALLOWED_ORIGINS = [
@@ -69,6 +77,15 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 ROOT_URLCONF = 'vsite.urls'
+
+REST_FRAMEWORK = {
+     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+      ],
+      'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',  # allow any for now, change to Is Authenticated in production
+    ],
+}
 
 TEMPLATES = [
     {
@@ -100,15 +117,27 @@ WSGI_APPLICATION = 'vsite.wsgi.application'
 # }
 
 DATABASES = {
-    'default': {
+    'video_db': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'video_db',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': 'localhost',
         'PORT': '5433',
-    }
+    },
+
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'users_db',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5433',
+    },
+
 }
+
+DATABASE_ROUTERS = ['vsite.routers.VideoRouter']
 
 
 # Password validation
@@ -157,3 +186,27 @@ MEDIA_URL = '/uploads/'
 MEDIA_ROOT = BASE_DIR / 'uploads'
 
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+
+
+# LOGIN_REDIRECT_URL = "/"
+# LOGOUT_REDIRECT_URL = "/"
+# LOGIN_URL = "/accounts/login/"
+
+# SIMPLE_JWT = {
+#      'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+#      'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+#      'ROTATE_REFRESH_TOKENS': True,
+#      'BLACKLIST_AFTER_ROTATION': True
+# }
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "Your_Email"
+EMAIL_HOST_PASSWORD = "Your_Password"
+
+# CSRF_COOKIE_SECURE = False
+# CSRF_EXEMPT_URLS = [r'^/accounts/']
+CSRF_COOKIE_SECURE = False
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000']
