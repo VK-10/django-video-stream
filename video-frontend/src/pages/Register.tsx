@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useState, type ReactElement } from "react"
 import {useNavigate, Link} from "react-router-dom"
+import { registerUser } from "../services/authServices"
 
-const Register = () => {
+const RegisterPage = () => {
     const navigate = useNavigate()
 
     const [form, setForm] = useState({
@@ -10,38 +11,34 @@ const Register = () => {
         password1:"",
         password2:"",
     })
+    const [loading , setLoading] = useState(false)
 
-    const [error, setError] = useState([""])
+    const [error, setError] = useState([])
 
-    const handleChange = (e) => {
+    const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+        setError([])
         setForm({
             ...form,
             [e.target.name]: e.target.value
         })
     }
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
-
+        setError([])
         if (form.password1 !== form.password2) {
-            setError(["Passwords do not match"])
+            setError(["Password do not match"])
             return 
         }
 
+        setLoading(true)
+
         try {
-            const response = await fetch("http://localhost:8000/api/register/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(form)
-            })
+            const result = await registerUser(form);
 
-            const data = await response.json()
-
-            if (!response.ok) {
-                setError(data.errors || ["Registration failed"])
+            if (!result.success) {
+                setError(result.errors)
                 return
             }
 
@@ -50,6 +47,9 @@ const Register = () => {
 
         catch (err) {
             setError(["Something went wrong"])
+        }
+        finally {
+            setLoading(false)
         }
     }
 
@@ -113,7 +113,10 @@ const Register = () => {
                     />
                 </div>
 
-                <button type="submit">Create Account</button>
+                <button type="submit" disabled={loading}>
+                    {loading ? "Creating..." : "Create Account"}
+                </button>
+
             </form>
 
         </div>
@@ -121,3 +124,5 @@ const Register = () => {
 
     )
 }   
+
+export default RegisterPage

@@ -1,5 +1,6 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
+import { loginUser } from "../services/authServices";
 
 const Login = () => {
     const navigate = useNavigate()
@@ -9,73 +10,102 @@ const Login = () => {
         password: ""
     })
 
-    const [error, setError] = useState("")
+    const [error, setError] = useState<string[]>([])
+    const [loading, setLoading] = useState(false)
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setError([])
         setForm({
             ...form,
             [e.target.name]: e.target.value
-        })
-    }
+        });
+    };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
         e.preventDefault()
 
+        setError([])
+
+         if (!form.username || !form.password) {
+            setError(["All fields are required"]);
+            return;
+        }
+
+    setLoading(true);
+
         try{
-            const res = await fetch("http://localhost:8000/api/login/", {
-                method: "POST",
-                headers : {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(form)
-            })
+            const res = await loginUser(form);
 
-            const data = await res.json()
-
-            if (!res.ok) {
-                setError(data.detail || "Invalid credentials")
-                return 
+            if (!res.success) {
+                setError(res.errors);
+                return;
             }
+            navigate("/dashboard")
 
-            localStorage.setItem('access', data.access)
-            localStorage.setItem("refresh", data.refresh)
+            localStorage.setItem('access', res.data.access)
+            localStorage.setItem("refresh", res.data.refresh)
 
             navigate("/dashboard")
-        } catch (err) {
-            setError('Something went wrong')
+        } catch  {
+            setError(['Something went wrong'])
+        } finally {
+            setLoading(false);
         }
     }
 
 
     return (
-        <form className="auth-container">
-            <h1>Login</h1>
+        <div className="auth-container">
+            <div className="auth-header">
+                <h1>Login</h1>
+                <p> Welcome back! PLease eneter your details</p>
+            </div>
 
-            {error && <p style ={{ color: "red"}} > {error} </p>}
+            {/* {error && <p style ={{ color: "red"}} > {error[0]} </p>} */}
+             {error.length > 0 && (
+                <ul className="error-list">
+                {error.map((err, i) => (
+                    <li key={i}>{err}</li>
+                ))}
+                </ul>
+            )}
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="auth-form">
+
+                <div className="form-group">
+                <label>Username</label>
                 <input
                     name="username"
-                    placeholder="Username"
                     value={form.username}
                     onChange={handleChange}
+                    required
                 />
+                </div>
 
+                <div className="form-group">
+                <label>Password</label>
                 <input
                     type="password"
                     name="password"
-                    placeholder="Password"
                     value={form.password}
                     onChange={handleChange}
+                    required
                 />
+                </div>
 
-                <button type="submit">Login</button>
+                
+                <button
+                    type="submit"
+                    disabled={loading}
+                    >
+                    {loading ? "Signing in..." : "Login"}
+                </button>
 
             </form>
             
             <Link to="/register">Create account</Link>
 
-        </form>
+        </div>
     )
 }
 

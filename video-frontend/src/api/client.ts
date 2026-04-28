@@ -1,52 +1,76 @@
-const apiFetch = async(url:URL, options = {}) => {
-    const access = localStorage.getItem("access")
+import { tokenStorage } from "../storage/tokenStorage";
+
+type FetchOptions = RequestInit & {
+    _retry? : boolean;
+}
+
+const apiFetch = async(url:string, options: FetchOptions = {}): Promise<Response>  => {
+    const access = tokenStorage.getAccessToken()
+
+    const headers: HeadersInit = {
+    ...(options.headers || {})
+    };
+     if (!(options.body instanceof FormData)) {
+        headers["Content-Type"] = "application/json";
+    }
+     if (access) {
+        headers["Authorization"] = `Bearer ${access}`;
+    }
 
     const response = await fetch(url, {
+    ...options,
+    headers
+  });
+
+  if (
+    response.status === 401 &&
+    !options._retry
+  ) {
+    const newAccess = await refreshToken();
+
+    if (newAccess) {
+      return apiFetch(url, {
         ...options,
-        headers: {
-             "Content-Type": "application/json",
-            Authorization: `Bearer ${access}`,
-            ...options.headers
-        }
-    })
-    
-    if (response.status === 401) {
-        const newAccess = await refreshToken()
-
-        if (newAccess) {
-            return apiFetch(url, options) // retry
-        }
+        _retry: true
+      });
     }
+  }
 
-    return response
+  return response;
+};
 
-}
+const refreshToken = async (): Promise<string | null> => {
+  try {
+    const refresh = tokenStorage.getRefreshToken();
 
-const refreshToken = async() => {
-    const refresh = localStorage.getItem("refresh")
+    if (!refresh) return null;
 
-    if (!refresh) return null
-
-    const response = await fetch("http://localhost:8000/api/token/refresh/", {
+    const response = await fetch(
+      "http://localhost:8000/api/token/refresh/",
+      {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({ refresh })
-    })
+      }
+    );
 
     if (!response.ok) {
-        localStorage.clear()
-        window.location.href = "/login"
-        return null
+      tokenStorage.clearTokens();
+      window.location.href = "/login";
+      return null;
     }
 
-    const data = await response.json()
-    localStorage.setItem("access", data.access)
+    const data = await response.json();
 
-    return data.access
-}
+    tokenStorage.setAccessToken(data.access);
 
+    return data.access;
 
-export default apiFetch
+  } catch {
+    return null;
+  }
+};
 
+export default apiFetch;
