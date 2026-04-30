@@ -6,7 +6,7 @@ const Login = () => {
     const navigate = useNavigate()
 
     const [form , setForm] = useState({
-        username: "",
+        email: "",
         password: ""
     })
 
@@ -21,12 +21,12 @@ const Login = () => {
         });
     };
 
-    const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
         setError([])
 
-         if (!form.username || !form.password) {
+         if (!form.email || !form.password) {
             setError(["All fields are required"]);
             return;
         }
@@ -42,10 +42,10 @@ const Login = () => {
             }
             navigate("/dashboard")
 
-            localStorage.setItem('access', res.data.access)
-            localStorage.setItem("refresh", res.data.refresh)
+            sessionStorage.setItem('access', res.data.access_token)
+            sessionStorage.setItem("refresh", res.data.refresh_token)
 
-            navigate("/dashboard")
+            // navigate("/dashboard")
         } catch  {
             setError(['Something went wrong'])
         } finally {
@@ -73,10 +73,10 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="auth-form">
 
                 <div className="form-group">
-                <label>Username</label>
+                <label>Email</label>
                 <input
-                    name="username"
-                    value={form.username}
+                    name="email"
+                    value={form.email}
                     onChange={handleChange}
                     required
                 />

@@ -4,6 +4,7 @@ import LandingPage from "./pages/Landing"
 import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import Watch from "./pages/Watch";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path ="/login" element ={<LoginPage/>} />
             <Route path ="/register" element ={<RegisterPage/>} />
             <Route path ="/dashboard" element ={<Dashboard/>} />
+            <Route path="/watch/:id" element={<Watch />} />
         {/*Protected Routes*/}
 
       </Routes>

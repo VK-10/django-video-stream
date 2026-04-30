@@ -8,7 +8,7 @@ export type RegisterPayload = {
 }
 
 export type LoginPayload = {
-    username: string;
+    email: string;
     password: string;
 }
 
@@ -17,7 +17,7 @@ type AuthResult = | { success: true; data?: any }
 
 export async function registerUser(payload: RegisterPayload): Promise<AuthResult> {
     try {
-        const response = await fetch("http://localhost:8000/api/register/", {
+        const response = await fetch("http://localhost:8000/accounts/register/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -56,7 +56,7 @@ export async function registerUser(payload: RegisterPayload): Promise<AuthResult
 
 export async function loginUser(payload : LoginPayload): Promise<AuthResult> {
     try {
-        const response = await fetch("http://localhost:8000/api/token/", {
+        const response = await fetch("http://localhost:8000/accounts/login/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -78,15 +78,15 @@ export async function loginUser(payload : LoginPayload): Promise<AuthResult> {
             };
         }
 
-        if (!data.access || !data.resfresh) {
+        if (!data.access_token || !data.refresh_token) {
             return {
                 success: false,
                 errors: ["Invalid authentication response"]
             };
         }
 
-        tokenStorage.setAccessToken(data.access)
-        tokenStorage.setRefreshToken(data.refresh)
+        tokenStorage.setAccessToken(data.access_token)
+        tokenStorage.setRefreshToken(data.refresh_token)
 
         return {
             success: true,
