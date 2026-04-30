@@ -15,6 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from api.views import VideoDetailView
+from api.views import VideoListView
 from django.conf.urls import include
 from api.views import VideoView
 from django.contrib import admin
@@ -35,5 +37,7 @@ urlpatterns = [
     # path("accounts/", include("accounts.urls")),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path("accounts/", include('accounts.urls')),
-    path('post/', VideoView.as_view())
+    path('post/', VideoView.as_view()),
+    path("videos/", VideoListView.as_view()),
+    path("videos/<int:pk>/", VideoDetailView.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

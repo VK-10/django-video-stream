@@ -1,3 +1,4 @@
+from api.models import MyModel
 from api.serializers import ApiSerializer
 from workers.tasks import process_video
 from importlib.resources import path
@@ -65,6 +66,29 @@ class VideoView(APIView):
                 return Response({'message': 'uploaded'})
 
         return Response(serializer.errors, status=400)
+
+    
+class VideoListView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        videos = MyModel.objects.all().order_by("-created_at")
+        serializer = ApiSerializer(videos, many=True)
+        return Response(serializer.data)
+
+class VideoDetailView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            video = MyModel.objects.get(pk=pk)
+        except MyModel.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+
+        serializer = ApiSerializer(video)
+        return Response(serializer.data)
 
 
 
