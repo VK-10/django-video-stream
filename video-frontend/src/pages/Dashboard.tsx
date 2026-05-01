@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { getVideos } from "../services/videoService";
 import VideoGrid from "../components/VideoGrid";
+import type { Video } from "../models/vid-model";
 
 
 
 export default function Dashboard() {
-  const [videos, setVideos] = useState([])
+  const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState("");
 
@@ -14,9 +15,15 @@ export default function Dashboard() {
     const fetchVideos = async () => {
       try {
         const data = await getVideos();
-        setVideos(data)
-      } catch {
-        console.error("failed");
+        // console.log("VIDEOS:", data);
+        // console.log("TYPE:", typeof data);
+        // console.log("IS ARRAY:", Array.isArray(data));
+        // console.log("VALUE:", data);
+        console.log("RETURNED FROM SERVICE:", data); 
+        setVideos(Array.isArray(data) ? data : [])
+         console.log("After setVideos:", data); 
+      } catch (error) {
+        console.error("failed", error);
       } finally {
         setLoading(false)
       }
@@ -25,52 +32,60 @@ export default function Dashboard() {
     fetchVideos();
   }, [])
 
-  const filteredVideos = videos.filter((video) =>
-    video.title.toLowerCase().includes(
-      query.toLowerCase()
-    )
-  );
+  console.log("VIDEOS STATE:", videos);
+  // console.log("getVideos function:", getVideos.toString());
 
-  return (
-    <div className="min-h-screen bg-white">
+  const filteredVideos = Array.isArray(videos)
+  ? videos.filter(v => v.title.toLowerCase().includes(query.toLowerCase()))
+  : [];
+
+ return (
+  <div className="flex min-h-screen bg-white">
+
+    {/* Sidebar */}
+    <aside className="w-64 border-r hidden md:block p-4 space-y-4">
+      <h2 className="font-semibold">Menu</h2>
+      <div className="space-y-2 text-sm">
+        <p className="cursor-pointer hover:bg-gray-100 p-2 rounded">Home</p>
+        <p className="cursor-pointer hover:bg-gray-100 p-2 rounded">Subscriptions</p>
+        <p className="cursor-pointer hover:bg-gray-100 p-2 rounded">Library</p>
+      </div>
+    </aside>
+
+    {/* Main */}
+    <div className="flex-1 flex flex-col">
 
       {/* Navbar */}
-      <header className="border-b sticky top-0 bg-white z-20">
-        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold tracking-tight">
-            StreamVault
-          </h1>
+      <header className="border-b px-6 py-4 flex items-center justify-between">
+        <h1 className="text-xl font-bold">StreamVault</h1>
 
-          <div className="relative w-full max-w-xl">
-            <Search className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
-
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search videos..."
-              className="w-full pl-12 pr-4 py-3 rounded-2xl border outline-none"
-            />
-          </div>
-
-          <button className="px-5 py-3 rounded-2xl border font-medium hover:shadow-sm">
-            Upload
+        <div className="flex items-center gap-2 w-full max-w-xl">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search"
+            className="flex-1 border px-4 py-2 rounded-l-full outline-none"
+          />
+          <button className="px-4 py-2 border rounded-r-full bg-gray-100">
+            <Search size={18} />
           </button>
         </div>
+
+        <button className="px-4 py-2 border rounded-lg">
+          Upload
+        </button>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-10">
-
-        <h2 className="text-3xl font-bold mb-6">
-          Recommended Videos
-        </h2>
-
+      {/* Content */}
+      <main className="p-6">
         {loading ? (
-          <p className="text-gray-500">Loading videos...</p>
+          <p className="text-gray-500">Loading...</p>
         ) : (
           <VideoGrid videos={filteredVideos} />
         )}
-
       </main>
+
     </div>
-  );
+  </div>
+);
 }

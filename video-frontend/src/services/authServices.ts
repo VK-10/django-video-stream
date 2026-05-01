@@ -84,7 +84,7 @@ export async function loginUser(payload : LoginPayload): Promise<AuthResult> {
                 errors: ["Invalid authentication response"]
             };
         }
-
+        // console.log("Login successful, received tokens:", data.access_token, data.refresh_token);
         tokenStorage.setAccessToken(data.access_token)
         tokenStorage.setRefreshToken(data.refresh_token)
 

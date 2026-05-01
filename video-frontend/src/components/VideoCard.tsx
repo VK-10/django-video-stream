@@ -1,29 +1,50 @@
+import { useNavigate } from "react-router-dom";
+
 function VideoCard({ video }: any) {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate(`/videos/${video.id}`)
+  };
   return (
-    <div className="group cursor-pointer">
-      <div className="relative overflow-hidden rounded-2xl shadow-sm">
+    <div className="cursor-pointer group" onClick={handleClick}>
+
+      {/* Thumbnail */}
+      <div className="relative">
         <img
-          src={video.thumbnail}
-          alt={video.title}
-          className="w-full h-52 object-cover group-hover:scale-105 transition duration-300"
+          src={`http://localhost:8000${video.thumbnail}`}
+          className="w-full h-44 object-cover rounded-xl"
         />
 
-        <span className="absolute bottom-3 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded-lg">
-          {video.duration}
+        <span className="absolute bottom-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">
+          10:20
         </span>
       </div>
 
-      <div className="mt-3 space-y-1">
-        <h3 className="font-semibold text-lg line-clamp-2">
-          {video.title}
-        </h3>
+      {/* Info */}
+      <div className="flex gap-3 mt-3">
 
-        <p className="text-sm text-gray-500">
-          {video.views}
-        </p>
+        {/* Avatar */}
+        <div className="w-9 h-9 bg-gray-300 rounded-full" />
+
+        {/* Text */}
+        <div className="flex flex-col">
+          <h3 className="text-sm font-semibold line-clamp-2">
+            {video.title}
+          </h3>
+
+          <p className="text-xs text-gray-500">
+            {video.name}
+          </p>
+
+          <p className="text-xs text-gray-500">
+            12K views • 2 days ago
+          </p>
+        </div>
       </div>
+
     </div>
   );
 }
 
-export default VideoCard
+
+export default VideoCard;

@@ -1,6 +1,7 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { loginUser } from "../services/authServices";
+import { tokenStorage } from "../storage/tokenStorage";
 
 const Login = () => {
     const navigate = useNavigate()
@@ -40,12 +41,16 @@ const Login = () => {
                 setError(res.errors);
                 return;
             }
+
+
+            tokenStorage.setAccessToken( res.data.access_token)
+            tokenStorage.setRefreshToken(res.data.refresh_token)
+
+            console.log("RES DATA:", res.data);
+            console.log("ACCESS:", tokenStorage.getAccessToken());
+            console.log("REFRESH:", tokenStorage.getRefreshToken());
+
             navigate("/dashboard")
-
-            sessionStorage.setItem('access', res.data.access_token)
-            sessionStorage.setItem("refresh", res.data.refresh_token)
-
-            // navigate("/dashboard")
         } catch  {
             setError(['Something went wrong'])
         } finally {
@@ -58,7 +63,7 @@ const Login = () => {
         <div className="auth-container">
             <div className="auth-header">
                 <h1>Login</h1>
-                <p> Welcome back! PLease eneter your details</p>
+                <p> Welcome back! Please enter your details</p>
             </div>
 
             {/* {error && <p style ={{ color: "red"}} > {error[0]} </p>} */}
