@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 function VideoCard({ video }: any) {
   const navigate = useNavigate();
+  console.log("VIDEO:", video);
   const handleClick = () => {
     navigate(`/videos/${video.id}`)
   };

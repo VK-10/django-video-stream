@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import Hls from "hls.js";
+import { useRef, useState } from "react";
 import useHlsPlayer from "./useHlsPlayer";
 
 type Props = {
@@ -7,79 +6,50 @@ type Props = {
 };
 
 export default function VideoPlayer({ src }: Props) {
-    const videoRef = useRef<HTMLVideoElement | null > (null);
-    const {loading , error, setQuality } = useHlsPlayer(videoRef,src);
-    const [isPlaying, setIsPlaying] = useState(false)
-    const [isBuffering, setIsBuffering] = useState(false)
-    const [playbackState, setPlaybackState] = useState<"idle" | "playing" | "paused" | "ended">("idle");
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  if (error) {
-    return (
-      <p>{error}</p>
-    );
-  }
+  const {
+    levels,
+    currentLevel,
+    loading,
+    error,
+    setQuality,
+    setAutoQuality,
+  } = useHlsPlayer(videoRef, src);
+
+  const [isBuffering, setIsBuffering] = useState(false);
+
+  if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <>
-      {isBuffering && <p>Loading stream...</p>}
-       {/* {isBuffering && ...spinner} */}
+    <div className="space-y-3">
+      {loading && <p>Loading stream...</p>}
+      {isBuffering && <p>Buffering...</p>}
+
       <video
         ref={videoRef}
         controls
-        onPlay = {() => {
-            setIsPlaying(true);
-            setIsBuffering(false);
-            setPlaybackState("playing");
-        }}
-        onWaiting={() => {
-            setIsBuffering(true)
-            console.log("Video is waiting for more data.")
-        }}
-        onPlaying={() => {
-            // resumes after buffering too
-            setIsBuffering(false);
-            setIsPlaying(true);
-            setPlaybackState("playing");
-        }}
-        onPause={() => {
-            setIsPlaying(false);
-            setPlaybackState("paused");
-        }}
-        onEnded={() => {
-            setIsPlaying(false);
-            setIsBuffering(false);
-            setPlaybackState("ended");
-        }}
-        playsInline
-        style={{ width: "80%" }}
-
+        className="w-full rounded-xl"
+        onWaiting={() => setIsBuffering(true)}
+        onPlaying={() => setIsBuffering(false)}
       />
 
-     {/* <button onClick={setAutoQuality}>
-  Auto
-</button> */}
+      {/* Quality Controls */}
+      <div className="flex gap-2 flex-wrap">
+        <button onClick={setAutoQuality}>
+          Auto {currentLevel === -1 && "✓"}
+        </button>
 
-<button onClick={() => setQuality(0)}>
-  100p
-</button>
-
-<button onClick={() => setQuality(1)}>
-  200p
-</button>
-
-<button onClick={() => setQuality(2)}>
-  350p
-</button>
-
-<button onClick={() => setQuality(3)}>
-  750p (1.7 Mbps)
-</button>
-
-<button onClick={() => setQuality(4)}>
-  750p (2.4 Mbps)
-</button>
-        
-      
-    </>
+        {levels.map((level) => (
+          <button
+            key={level.index}
+            onClick={() => setQuality(level.index)}
+          >
+            {level.height}p{" "}
+            {currentLevel === level.index && "✓"}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 /*route-level UI*/
 
-import {useEfect, useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useParams} from "react-router-dom";
 import VideoPlayer from "../features/video/Player";
 import {getVideoById} from "../services/videoService";
@@ -21,7 +21,7 @@ export default function Watch() {
         const fetchVideo = async () => {
             try {
                 const data =await getVideoById(id!);
-                setVideo(data);
+                setVideo(Array.isArray(data) ? data[0] : data);
             } catch {
                 console.error("Failed to fetch video")
             } finally {

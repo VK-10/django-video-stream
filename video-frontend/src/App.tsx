@@ -22,7 +22,7 @@ function App() {
             <Route path ="/login" element ={<LoginPage/>} />
             <Route path ="/register" element ={<RegisterPage/>} />
             <Route path ="/dashboard" element ={<Dashboard/>} />
-            <Route path="/watch/:id" element={<Watch />} />
+            <Route path="/videos/:id" element={<Watch />} />
         {/*Protected Routes*/}
 
       </Routes>
