@@ -10,15 +10,15 @@ function VideoCard({ video }: any) {
     <div className="cursor-pointer group" onClick={handleClick}>
 
       {/* Thumbnail */}
-      <div className="relative">
+      <div className="relative overflow-hidden rounded-xl">
         <img
           src={`http://localhost:8000${video.thumbnail}`}
-          className="w-full h-44 object-cover rounded-xl"
+          className="w-full h-44 object-cover transition-transform duration-300 group-hover:scale-105"
         />
-
-        <span className="absolute bottom-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition" />
+        {/* <span className="absolute bottom-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">
           10:20
-        </span>
+        </span> */}
       </div>
 
       {/* Info */}
@@ -29,7 +29,7 @@ function VideoCard({ video }: any) {
 
         {/* Text */}
         <div className="flex flex-col">
-          <h3 className="text-sm font-semibold line-clamp-2">
+          <h3 className="text-sm font-semibold line-clamp-2 group-hover:text-blue-400 transition">
             {video.title}
           </h3>
 
@@ -37,9 +37,9 @@ function VideoCard({ video }: any) {
             {video.name}
           </p>
 
-          <p className="text-xs text-gray-500">
+          {/* <p className="text-xs text-gray-500">
             12K views • 2 days ago
-          </p>
+          </p> */}
         </div>
       </div>
 
