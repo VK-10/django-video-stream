@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 import { getVideos } from "../services/videoService";
 import VideoGrid from "../components/VideoGrid";
 import type { Video } from "../models/vid-model";
+import UploadVideoModal from "../components/Modals/UploadVideoModal";
 
 
 
@@ -10,6 +11,7 @@ export default function Dashboard() {
   const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState("");
+  const [isUploadOpen, setIsUploadOpen] = useState(false);;
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -71,7 +73,9 @@ export default function Dashboard() {
           </button>
         </div>
 
-        <button className="px-4 py-2 border rounded-lg">
+        <button className="px-4 py-2 border rounded-lg"
+          onClick = {() => setIsUploadOpen(true)}
+          >
           Upload
         </button>
       </header>
@@ -84,6 +88,11 @@ export default function Dashboard() {
           <VideoGrid videos={filteredVideos} />
         )}
       </main>
+
+      <UploadVideoModal
+      isOpen={isUploadOpen}
+      onClose={() => setIsUploadOpen(false)}
+    />
 
     </div>
   </div>

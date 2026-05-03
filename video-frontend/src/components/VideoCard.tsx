@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 function VideoCard({ video }: any) {
   const navigate = useNavigate();
-  console.log("VIDEO:", video);
+  console.log("VIDEO-cardddddddd:", video);
   const handleClick = () => {
     navigate(`/videos/${video.id}`)
   };
@@ -12,7 +12,7 @@ function VideoCard({ video }: any) {
       {/* Thumbnail */}
       <div className="relative overflow-hidden rounded-xl">
         <img
-          src={`http://localhost:8000${video.thumbnail}`}
+          src={`${video.thumbnail}`}
           className="w-full h-44 object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition" />
