@@ -1,100 +1,117 @@
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Home, BookMarked, Library, Upload, LogOut, Play } from "lucide-react";
 import { getVideos } from "../services/videoService";
 import VideoGrid from "../components/VideoGrid";
 import type { Video } from "../models/vid-model";
 import UploadVideoModal from "../components/Modals/UploadVideoModal";
-
-
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
-  const [videos, setVideos] = useState<Video[]>([])
-  const [loading, setLoading] = useState(true)
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [isUploadOpen, setIsUploadOpen] = useState(false);;
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchVideos = async () => {
       try {
         const data = await getVideos();
-        // console.log("VIDEOS:", data);
-        // console.log("TYPE:", typeof data);
-        // console.log("IS ARRAY:", Array.isArray(data));
-        // console.log("VALUE:", data);
-        console.log("RETURNED FROM SERVICE:", data); 
-        setVideos(Array.isArray(data) ? data : [])
-         console.log("After setVideos:", data); 
+        console.log("RETURNED FROM SERVICE:", data);
+        setVideos(Array.isArray(data) ? data : []);
+        console.log("After setVideos:", data);
       } catch (error) {
         console.error("failed", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     };
-
     fetchVideos();
-  }, [])
+  }, []);
 
   console.log("VIDEOS STATE:", videos);
-  // console.log("getVideos function:", getVideos.toString());
 
   const filteredVideos = Array.isArray(videos)
-  ? videos.filter(v => v.title.toLowerCase().includes(query.toLowerCase()))
-  : [];
+    ? videos.filter((v) => v.title.toLowerCase().includes(query.toLowerCase()))
+    : [];
 
- return (
-  <div className="flex min-h-screen bg-white">
+  return (
+    <div className="dash-layout">
 
-    {/* Sidebar */}
-    <aside className="w-64 border-r hidden md:block p-4 space-y-4">
-      <h2 className="font-semibold">Menu</h2>
-      <div className="space-y-2 text-sm">
-        <p className="cursor-pointer hover:bg-gray-100 p-2 rounded">Home</p>
-        <p className="cursor-pointer hover:bg-gray-100 p-2 rounded">Subscriptions</p>
-        <p className="cursor-pointer hover:bg-gray-100 p-2 rounded">Library</p>
-      </div>
-    </aside>
+      {/* ── Sidebar ── */}
+      <aside className="dash-sidebar">
+        <div className="sidebar-logo">StreamVault</div>
 
-    {/* Main */}
-    <div className="flex-1 flex flex-col">
+        <nav className="sidebar-nav">
+          <p className="sidebar-nav-label">Menu</p>
+          <div className="sidebar-item active">
+            <Home size={15} /> Home
+          </div>
+          <div className="sidebar-item">
+            <BookMarked size={15} /> Subscriptions
+          </div>
+          <div className="sidebar-item">
+            <Library size={15} /> Library
+          </div>
+        </nav>
 
-      {/* Navbar */}
-      <header className="border-b px-6 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold">StreamVault</h1>
+        <nav className="sidebar-nav" style={{ marginTop: "auto" }}>
+          <p className="sidebar-nav-label">Account</p>
+          <div className="sidebar-item" onClick={() => navigate("/logout")}>
+            <LogOut size={15} /> Sign Out
+          </div>
+        </nav>
+      </aside>
 
-        <div className="flex items-center gap-2 w-full max-w-xl">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search"
-            className="flex-1 border px-4 py-2 rounded-l-full outline-none"
-          />
-          <button className="px-4 py-2 border rounded-r-full bg-gray-100">
-            <Search size={18} />
+      {/* ── Main ── */}
+      <div className="dash-main">
+
+        {/* Header */}
+        <header className="dash-header">
+          <div className="search-wrap">
+            <Search size={15} />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search videos…"
+            />
+          </div>
+
+          <button className="btn-upload" onClick={() => setIsUploadOpen(true)}>
+            <Upload size={13} style={{ display: "inline", marginRight: 6 }} />
+            Upload
           </button>
-        </div>
+        </header>
 
-        <button className="px-4 py-2 border rounded-lg"
-          onClick = {() => setIsUploadOpen(true)}
-          >
-          Upload
-        </button>
-      </header>
+        {/* Content */}
+        <main className="dash-content">
+          <h2 className="dash-section-title">
+            {query ? `Results for "${query}"` : "All Videos"}
+          </h2>
 
-      {/* Content */}
-      <main className="p-6">
-        {loading ? (
-          <p className="text-gray-500">Loading...</p>
-        ) : (
-          <VideoGrid videos={filteredVideos} />
-        )}
-      </main>
+          {loading ? (
+            <div className="dash-loading">
+              <div className="loading-dot" />
+              <div className="loading-dot" />
+              <div className="loading-dot" />
+            </div>
+          ) : filteredVideos.length === 0 ? (
+            <div className="dash-empty">
+              <Play size={32} strokeWidth={1} />
+              <p>No videos found</p>
+              <span>Try a different search or upload your first video</span>
+            </div>
+          ) : (
+            <VideoGrid videos={filteredVideos} />
+          )}
+        </main>
+      </div>
 
+      {/* Upload Modal */}
       <UploadVideoModal
-      isOpen={isUploadOpen}
-      onClose={() => setIsUploadOpen(false)}
-    />
-
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
+      />
     </div>
-  </div>
-);
+  );
 }
