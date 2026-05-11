@@ -150,3 +150,33 @@ a {
   text-align: center;
   color: var(--text-secondary);
 }
+
+
+.dash-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 10px;
+  color: var(--muted);
+  text-align: center;
+}
+ 
+.dash-empty svg {
+  color: var(--subtle);
+  margin-bottom: 4px;
+}
+ 
+.dash-empty p {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 300;
+  color: var(--text);
+}
+ 
+.dash-empty span {
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
