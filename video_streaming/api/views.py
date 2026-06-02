@@ -1,3 +1,4 @@
+from api.serializers import VideoResponseSerializer
 from api.models import MyModel
 from api.serializers import ApiSerializer
 from workers.tasks import process_video
@@ -20,7 +21,6 @@ from rest_framework.views import APIView
 
 
 
-
 class VideoView(APIView):
 
     authentication_classes = [JWTAuthentication]
@@ -29,7 +29,7 @@ class VideoView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     # request.data -> Query-dict which likely include all the form parameters
-    #  request.files -> will be a Query dict containing all the form files
+    # request.files -> will be a Query dict containing all the form files
 
     def post(self, request, format=None):
 
@@ -74,7 +74,7 @@ class VideoListView(APIView):
 
     def get(self, request):
         videos = MyModel.objects.all().order_by("-created_at")
-        serializer = ApiSerializer(videos, many=True)
+        serializer = VideoResponseSerializer(videos, many=True,  context={"request": request})
         return Response(serializer.data)
 
 class VideoDetailView(APIView):
@@ -87,7 +87,7 @@ class VideoDetailView(APIView):
         except MyModel.DoesNotExist:
             return Response({"error": "Not found"}, status=404)
 
-        serializer = ApiSerializer(video)
+        serializer = VideoResponseSerializer(video, context={"request": request})
         return Response(serializer.data)
 
 

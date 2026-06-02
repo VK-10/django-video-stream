@@ -38,6 +38,6 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path("accounts/", include('accounts.urls')),
     path('post/', VideoView.as_view()),
-    path("videos/", VideoListView.as_view()),
-    path("videos/<int:pk>/", VideoDetailView.as_view()),
+    path("api/videos/", VideoListView.as_view()),
+    path("api/videos/<uuid:pk>/", VideoDetailView.as_view())
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

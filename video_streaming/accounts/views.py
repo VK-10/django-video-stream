@@ -48,14 +48,14 @@ class ResetPasswordView(APIView):
             return Response({
                 "success": False,
                 "message": "password Reset Link has expired",
-            }, status=status.HTTP_200_OK,)
+            }, status=status.HTTP_401_UNAUTHORIZED,)
         elif token_obj is None or token != token_obj.token or token_obj.is_used:
             return Response(
                 {
                     "success": False,
                     "message": "Reset Password link is invalid!",
                 },
-                status= status.HTTP_200_OK
+                status= status.HTTP_401_UNAUTHORIZED
             )
         else:
             token_obj.is_used = True
@@ -126,7 +126,7 @@ class ForgotpasswordView(APIView):
                     "success": False,
                     "message": error_msg,
                 },
-                status=status.HTTP_200_OK,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
 class RegistrationView(APIView):
@@ -137,16 +137,8 @@ class RegistrationView(APIView):
     def post(self, request, format=None):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
+            user = serializer.save()
 
-            # check if user exsits already
-
-            User.objects.create_user(
-                email=request.data['email'],
-                password=request.data['password'],
-                name=request.data['name'],
-                country=request.data['country'],
-                phone=request.data.get('phone', None)
-            )
             return Response(
                 {
                     "success": True,
@@ -158,13 +150,15 @@ class RegistrationView(APIView):
             error_msg = ""
             for key in serializer.errors:
                 error_msg += serializer.errors[key][0]
+
+            print(serializer.errors)
             return Response(
-                {
-                    "success": False,
-                    "message": error_msg
-                },
-                status=status.HTTP_200_OK,
-            )
+    {
+        "success": False,
+        "errors": serializer.errors
+    },
+    status=status.HTTP_400_BAD_REQUEST,
+)
 
 class LoginView(APIView):
 
@@ -174,14 +168,15 @@ class LoginView(APIView):
     def post(self, request, format=None):
         email = request.data["email"]
         password = request.data["password"]
-        user = User.objects.get(email=email)
+        user = User.objects.filter(email=email).first()
+
         if user is None or not user.check_password(password):
             return Response(
                 {
                     "success": False,
                     "message": "Invalid Login Credentials!",
                 },
-                status = status.HTTP_200_OK,
+                status = status.HTTP_401_UNAUTHORIZED,
             )
         else:
             refresh = RefreshToken.for_user(user)
