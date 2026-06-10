@@ -1,8 +1,9 @@
 import json
-from channels.generic.websocket import AsyncWebcketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 import random
 import datetime
 import requests
+import aiohttp 
 
 from .room import Room
 import asyncio
@@ -10,6 +11,40 @@ import asyncio
 rooms = {}
 
 class WatchPartyConsumer(AsyncWebsocketConsumer):
+
+    # async def connect(self):
+    #     print("CONNECTED")
+    #     await self.accept()
+
+    # async def receive(self, text_data):
+    #     await self.send(text_data=text_data)
+
+    async def messageSend(self, event):
+        await self.send(
+        text_data=json.dumps(event)
+    )
+
+    async def giveTimeSend(self, event):
+        await self.send(
+        text_data=json.dumps(event)
+    )
+
+    async def usersCountSend(self, event):
+        await self.send(
+        text_data=json.dumps(event)
+    )
+
+    async def playerStateChangeSend(self, event):
+        await self.send(
+        text_data=json.dumps(event)
+    )
+
+    async def loadVideoSend(self, event):
+        await self.send(
+        text_data=json.dumps(event)
+    )
+
+
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room']
         self.room_group_name = 'room_%s' % self.room_name
@@ -29,7 +64,6 @@ class WatchPartyConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
-
 
 
     async def disconnect(self, close_code):
@@ -58,14 +92,16 @@ class WatchPartyConsumer(AsyncWebsocketConsumer):
             self.channel_name,
         )
 
+        
 
-    #recieve data from websocket user
-    async def recieve(self, text_data):
+    #receive data from websocket user
+    async def receive(self, text_data):
         room = rooms[self.room_group_name]
         text_data_json = json.loads(text_data)
+        print(text_data_json)
 
         try:
-            data = text_data_json['data']
+            payload = text_data_json['data']
             action = text_data_json['action']
 
         except KeyError:
@@ -103,7 +139,8 @@ class WatchPartyConsumer(AsyncWebsocketConsumer):
             )
 
         async def messageRecieve(text_data_json):
-            message = text_data_json['message']
+            payload = text_data_json["data"]
+            message = payload['message']
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -114,7 +151,8 @@ class WatchPartyConsumer(AsyncWebsocketConsumer):
             )
 
         async def NewUserTimeRecieve(text_data_json):
-            new_user_time = text_data_json['new_user_time']
+            payload = text_data_json["data"]
+            new_user_time = payload['new_user_time']
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -124,45 +162,52 @@ class WatchPartyConsumer(AsyncWebsocketConsumer):
             )
 
         async def addToPlaylistRecieve(text_data_json):
-            response = requests.get('http://noembed.com/embed?rl=https://www.youtube.com/watch?v=' + data)
-            title = response.json()['title']
+            payload = text_data_json['data']
+            # response = requests.get('http://noembed.com/embed?rl=https://www.youtube.com/watch?v=' + payload['video_id'])
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get('http://noembed.com/embed?rl=https://www.youtube.com/watch?v=' + payload['video_id']) as response:
+                    data = await response.json()
             room.index += 1
-            room.add_to_playlist({"video_id": data, "title":title,  "index": room.index})
+            room.add_to_playlist({"video_id": payload['video_id'], "title":data['title'],  "index": room.index})
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     'type': "addToPlaylistSend",
                     'action': action,
-                    'video_id': data,
-                    'title': title,
+                    'video_id': payload['video_id'],
+                    'title': data['title'],
                     'index': room.index,
                     'username': self.user.username,
                 }
             )
         
         async def removeFromPlaylistRecieve(text_data_json):
-            print("remove from playlist:" + data, data.split("*")[-1])
-            room.remove_from_playlist(data, data.split("*")[-1])
+            payload = text_data_json['data']
+            index = payload["index"]
+            print("remove from playlist:" + payload['video_id'], index)
+            room.remove_from_playlist(payload['video_id'], index)
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     'type': 'removeFromPlaylistSend',
                     'action': action,
-                    'data': data,
+                    'data': payload,
                     'username': self.user.username, 
                 }
             )
 
         async def loadVideoRecieve(text_data_json):
             action  = text_data_json['action']
-            data = text_data_json['data']
-            room.curr_video(data)
+            payload = text_data_json['data']
+            video_id = payload['video_id']
+            room.curr_video(video_id)
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     'type': 'loadVideoSend',
                     'action': action,
-                    'data': data,
+                    'data': payload,
                     'username': self.user.username,
                 }
             )
@@ -171,13 +216,13 @@ class WatchPartyConsumer(AsyncWebsocketConsumer):
             action = text_data_json['action']
             room = rooms[self.room_group_name]
             if action == "seek":
-                data = text_data_json['data']
+                payload = text_data_json['data']
                 await self.channel_layer.group_send(
                     self.room_group_name,
                     {
                         'type': 'playerStateChangeSend',
                         'action': action,
-                        'data': data,
+                        'data': payload,
                         'username': self.user.username,
                     }
                 )
@@ -193,10 +238,19 @@ class WatchPartyConsumer(AsyncWebsocketConsumer):
                             'username': self.user.username,
                         }
                     )
+       
 
-        recieved = {"username": setUserName, "message": messageRecieve, 
+        received = {"username": setUserName, "message": messageRecieve, 
                     "new_user_time": NewUserTimeRecieve, "addToPlaylist": addToPlaylistRecieve, 
                     'removeFromPlaylist': removeFromPlaylistRecieve, 'loadVideo': loadVideoRecieve, 
                     'play': playerStateChangeRecieve, 'pause': playerStateChangeRecieve, "seek": playerStateChangeRecieve}
         
-        await recieved.get(text_data_json['info'])(text_data_json)
+        action = text_data_json.get("action")
+
+        handler = received.get(action)
+
+        if handler is None:
+            print(f"Unknown action: {action}")
+            return
+
+        await handler(text_data_json)

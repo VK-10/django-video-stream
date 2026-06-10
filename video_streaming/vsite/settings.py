@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'accounts',
     'rest_framework_simplejwt.token_blacklist',
-    'watchparty'
+    'watchparty',
+    'channels',
     
 ]
 
@@ -139,6 +140,16 @@ DATABASES = {
 }
 
 DATABASE_ROUTERS = ['vsite.routers.VideoRouter']
+
+
+# channel_layer inmemory or redis
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
+ASGI_APPLICATION = "vsite.asgi.application"
 
 
 # Password validation

@@ -1,9 +1,8 @@
 from django.urls import path
 
-from . import consumers
+from .consumer import WatchPartyConsumer
 
 websocket_urlpatterns = [
-    path('ws/room/<uuid:room>', consumers.ChatConsumer),
-
+    path('ws/room/<uuid:room>', WatchPartyConsumer.as_asgi()),
 
 ]
