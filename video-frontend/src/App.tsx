@@ -5,6 +5,7 @@ import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Watch from "./pages/Watch";
+import WatchParty from "./components/watchparty/WatchParty";
 
 function App() {
   return (
@@ -15,18 +16,21 @@ function App() {
     //     src="https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8"
     //   />
     // </div>
-    <div>
-      <Routes>
-        {/*Public Routes*/}
-            <Route path ="/" element ={<LandingPage/>} />
-            <Route path ="/login" element ={<LoginPage/>} />
-            <Route path ="/register" element ={<RegisterPage/>} />
-            <Route path ="/dashboard" element ={<Dashboard/>} />
-            <Route path="/videos/:id" element={<Watch />} />
-        {/*Protected Routes*/}
+    // <div>
+    //   <Routes>
+    //     {/*Public Routes*/}
+    //         <Route path ="/" element ={<LandingPage/>} />
+    //         <Route path ="/login" element ={<LoginPage/>} />
+    //         <Route path ="/register" element ={<RegisterPage/>} />
+    //         <Route path ="/dashboard" element ={<Dashboard/>} />
+    //         <Route path="/videos/:id" element={<Watch />} />
+    //     {/*Protected Routes*/}
+  
 
-      </Routes>
-    </div>
+    //   </Routes>
+      
+    // </div>
+     <WatchParty />
   );
 }
 

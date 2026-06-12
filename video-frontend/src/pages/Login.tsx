@@ -43,7 +43,7 @@ const Login = () => {
             }
 
 
-            tokenStorage.setAccessToken( res.data.access_token)
+            tokenStorage.setAccessToken(res.data.access_token)
             tokenStorage.setRefreshToken(res.data.refresh_token)
 
             console.log("RES DATA:", res.data);
