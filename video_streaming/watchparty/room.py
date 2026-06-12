@@ -5,7 +5,7 @@ class Room:
         self.room_host = ''
         self.room_users = []
         self.current_video = 'HLEn5MyXUfE'
-        self.playlist = []
+        self.playlist = [] # I do have a playlist list 
         self.current_time = 0
         self.confirmation = 0
         self.state = ""
@@ -27,6 +27,7 @@ class Room:
 
     def remove_user(self, user):
         self.room_users.remove(user)
+
 
     def isEmpty(self):
         if len(self.room_users) == 0:

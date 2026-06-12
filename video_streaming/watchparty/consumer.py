@@ -162,6 +162,8 @@ class WatchPartyConsumer(AsyncWebsocketConsumer):
             )
 
         async def addToPlaylistRecieve(text_data_json):
+            # if self.user.username != room.room_host:
+            #     return #only host can select video
             payload = text_data_json['data']
             # response = requests.get('http://noembed.com/embed?rl=https://www.youtube.com/watch?v=' + payload['video_id'])
             
@@ -183,6 +185,8 @@ class WatchPartyConsumer(AsyncWebsocketConsumer):
             )
         
         async def removeFromPlaylistRecieve(text_data_json):
+            # if self.user.username != room.room_host:
+            #     return #only host can remove video
             payload = text_data_json['data']
             index = payload["index"]
             print("remove from playlist:" + payload['video_id'], index)
@@ -198,10 +202,19 @@ class WatchPartyConsumer(AsyncWebsocketConsumer):
             )
 
         async def loadVideoRecieve(text_data_json):
+            # if self.user.username != room.room_host:
+            #     return #only host can select video
             action  = text_data_json['action']
             payload = text_data_json['data']
-            video_id = payload['video_id']
-            room.curr_video(video_id)
+            
+            video_type  = payload['type']
+            
+            if video_type == 'youtube':
+                room.curr_video(payload)
+
+            elif video_type == "local":
+                room.curr_video(payload)
+                
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -213,6 +226,8 @@ class WatchPartyConsumer(AsyncWebsocketConsumer):
             )
 
         async def playerStateChangeRecieve(text_data_json):
+            if self.user.username != room.room_host:
+                return  # only host can play 
             action = text_data_json['action']
             room = rooms[self.room_group_name]
             if action == "seek":
