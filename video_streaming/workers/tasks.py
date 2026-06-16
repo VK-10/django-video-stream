@@ -18,5 +18,5 @@ def process_video(vid_id):
     process(vid_id,video_path, output_path)
 
     instance.status = "PROCESSED"
-    instance.hls_path = f"{output_path}/index.m3u8"
+    instance.hls_path = f"{output_path}/master.m3u8"
     instance.save()

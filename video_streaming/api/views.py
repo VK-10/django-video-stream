@@ -1,9 +1,14 @@
+from api.serializers import VideoResponseSerializer
+from api.models import MyModel
 from api.serializers import ApiSerializer
 from workers.tasks import process_video
 from importlib.resources import path
 import uuid
 from uuid import uuid4
 from django.shortcuts import render
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 # Create your views here.
@@ -16,13 +21,15 @@ from rest_framework.views import APIView
 
 
 
-
 class VideoView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     ""
     parser_classes = [MultiPartParser, FormParser]
 
     # request.data -> Query-dict which likely include all the form parameters
-    #  request.files -> will be a Query dict containing all the form files
+    # request.files -> will be a Query dict containing all the form files
 
     def post(self, request, format=None):
 
@@ -59,6 +66,29 @@ class VideoView(APIView):
                 return Response({'message': 'uploaded'})
 
         return Response(serializer.errors, status=400)
+
+    
+class VideoListView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        videos = MyModel.objects.all().order_by("-created_at")
+        serializer = VideoResponseSerializer(videos, many=True,  context={"request": request})
+        return Response(serializer.data)
+
+class VideoDetailView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            video = MyModel.objects.get(pk=pk)
+        except MyModel.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+
+        serializer = VideoResponseSerializer(video, context={"request": request})
+        return Response(serializer.data)
 
 
 

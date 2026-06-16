@@ -1,42 +1,37 @@
-import { useState } from 'react'
-import './App.css'
-import { VideoPlayer } from './VideoPlayer'
-import { useRef } from 'react'
-import { Controls, createPlayer} from '@videojs/react'
-import { Video, videoFeatures } from '@videojs/react/video'
-
+import { Route, Routes } from "react-router-dom";
+import VideoPlayer from "../src/features/video/Player";
+import LandingPage from "./pages/Landing"
+import LoginPage from "./pages/Login";
+import RegisterPage from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import Watch from "./pages/Watch";
+import WatchParty from "./components/watchparty/WatchParty";
 
 function App() {
-  
-  const Player = createPlayer({
-    features : videoFeatures,
-  })
-
-  function Controls() {
-    const store = Player.usePlayer();
-    const paused = Player.usePlayer((s) => s.paused);
-
-    return (
-    <div className="react-create-player-basic__controls">
-      <button
-        type="button"
-        className="react-create-player-basic__button"
-        onClick={() => (paused ? store.play() : store.pause())}
-      >
-        {paused ? 'Play' : 'Pause'}
-      </button>
-    </div>
-  );
-
-  }
   return (
-    <>
-      <div>
-        <h1> Video Player</h1>
-      </div>  
-      <VideoPlayer/>
-    </>
-  )
+    // <div>
+    //   <h1>Video Player</h1>
+
+    //   <VideoPlayer
+    //     src="https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8"
+    //   />
+    // </div>
+    // <div>
+    //   <Routes>
+    //     {/*Public Routes*/}
+    //         <Route path ="/" element ={<LandingPage/>} />
+    //         <Route path ="/login" element ={<LoginPage/>} />
+    //         <Route path ="/register" element ={<RegisterPage/>} />
+    //         <Route path ="/dashboard" element ={<Dashboard/>} />
+    //         <Route path="/videos/:id" element={<Watch />} />
+    //     {/*Protected Routes*/}
+  
+
+    //   </Routes>
+      
+    // </div>
+     <WatchParty />
+  );
 }
 
-export default App
+export default App;
