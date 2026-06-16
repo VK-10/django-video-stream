@@ -24,6 +24,7 @@ export default function WatchParty() {
         readyState,
     } = useWatchPartySocket(roomId);
 
+    // const [currentVideo, setCurrentVideo] =useState("");
     const [roomState, setRoomState] = useState<RoomState | null>(null);
     const currentVideo = roomState?.current_video;
 
@@ -37,6 +38,20 @@ export default function WatchParty() {
 
         if ("room_id" in lastJsonMessage) {
             setRoomState(lastJsonMessage);
+        }
+
+        console.log("MESSAGE", lastJsonMessage);
+
+        if (lastJsonMessage.action === "loadVideo" ){
+            setRoomState(prev => {
+                if(!prev) return prev;
+
+                return {
+                    ...prev,
+                    current_video:
+                        lastJsonMessage.data
+                }
+            })
         }
     }, [lastJsonMessage]);
 
@@ -93,7 +108,7 @@ export default function WatchParty() {
 
         {roomState?.current_video && (
             <YoutubePlayer
-                src={roomState.current_video}
+                src={roomState.current_video.video_id}
                 remoteCommand={lastJsonMessage}
             />
         )}
@@ -131,6 +146,7 @@ export default function WatchParty() {
         <Playlist
             lastJsonMessage={lastJsonMessage}
             sendJsonMessage={sendJsonMessage}
+            playlist={roomState?.playlist ?? []}
         />
 
         <ChatPanel

@@ -2,6 +2,7 @@
 export type SocketProps = {
     sendJsonMessage: (message: any) => void;
     lastJsonMessage: any;
+    onVideoSelect?: any;
 };
 
 export type ChatMessage = {
@@ -12,4 +13,6 @@ export type ChatMessage = {
 export type PlaylistItem = {
     video_id: string;
     title: string;
+
+    index: number;
 };
