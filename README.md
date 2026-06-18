@@ -232,6 +232,56 @@ CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
 
 ---
 
+# Watch Party Platform
+A real-time watch party application that synchronizes video playback across multiple users using WebSockets.
+
+## Architecture Overview
+```
+Client (React)
+  │
+  ▼
+Django Channels  ──►  (WebSocket Server)
+  │
+  ▼
+Room State Manager
+Host controls, playback Sync, participant events
+```
+
+## Features
+1.WebSocket-based communication using Django Channels
+2.Shared video playback synchronization
+3. Video change synchronization
+4.Room-based event broadcasting
+
+## Tech Stack
+| Layer                  | Technology                 |
+| ---------------------- | -------------------------- |
+| Frontend               | React                      |
+| Backend                | Django                     |
+| Realtime Communication | Django Channels            |
+| Protocol               | WebSockets                 |
+| State Management       | Room-based synchronization |
+
+```Current Implementation
+Room management
+Host assignment
+Event broadcasting
+Playback synchronization
+Video synchronization
+WebSocket communication
+```
+```In Progress
+Time drift correction (NTP-style synchronization)
+Host transfer functionality
+Presence tracking
+Chat integration
+Persistent room state using Redis
+Deployment
+```
+
+
+
+
 ## 📄 License
 
 MIT
