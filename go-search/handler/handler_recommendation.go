@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-search/helpers"
+	"go-search/recommendation"
 	"net/http"
 )
 
 func HandlerRecommendation(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		UserId string `json:"user_id"`
+		UserId int64 `json:"user_id"`
 	}
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
@@ -30,7 +31,7 @@ func HandlerRecommendation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	recs, err := Recommend(params.UserId)
+	recs, err := recommendation.Recommend(params.UserId)
 	if err != nil {
 		helpers.RespondWithError(
 			w,
