@@ -12,7 +12,7 @@ type Recommendation struct {
 	Score  float32
 }
 
-func Recommend(userID int64) ([]Recommendation, error) {
+func (rc *Recommender) Recommend(userID int64) ([]Recommendation, error) {
 
 	// defer ort.DestroyEnvironment()
 
@@ -54,8 +54,8 @@ func Recommend(userID int64) ([]Recommendation, error) {
 	// if err != nil {
 	// 	panic(err)
 	// }
-
-	err = Session.Run(
+	session := rc.Session
+	err = session.Run(
 		[]ort.Value{
 			userTensor,
 			itemTensor,

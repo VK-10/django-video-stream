@@ -8,7 +8,11 @@ import (
 	"net/http"
 )
 
-func HandlerRecommendation(w http.ResponseWriter, r *http.Request) {
+type Handler struct {
+	Recommender *recommendation.Recommender
+}
+
+func (h *Handler) HandlerRecommendation(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		UserId int64 `json:"user_id"`
 	}
@@ -17,7 +21,11 @@ func HandlerRecommendation(w http.ResponseWriter, r *http.Request) {
 
 	err := decoder.Decode(&params)
 
-	if params.UserId == "" {
+	if err != nil {
+		helpers.RespondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %s", err))
+		return
+	}
+	if params.UserId == 0 {
 		helpers.RespondWithError(
 			w,
 			400,
@@ -26,12 +34,7 @@ func HandlerRecommendation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err != nil {
-		helpers.RespondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %s", err))
-		return
-	}
-
-	recs, err := recommendation.Recommend(params.UserId)
+	recs, err := h.Recommender.Recommend(params.UserId)
 	if err != nil {
 		helpers.RespondWithError(
 			w,

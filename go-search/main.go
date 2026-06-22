@@ -2,7 +2,9 @@ package main
 
 import (
 	"go-search/handler"
+	"go-search/recommendation"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/go-chi/chi/v5"
@@ -11,16 +13,7 @@ import (
 	ort "github.com/yalue/onnxruntime_go"
 )
 
-// type RecommendationEngine struct {
-// 	Session  *ort.AdvancedSession
-// 	NumItems int
-// }
-
-// var recommender *RecommendationEngine
-
-var Session *ort.DynamicAdvancedSession
-
-func InitModel() error {
+func InitModel() (*ort.DynamicAdvancedSession, error) {
 	ort.SetSharedLibraryPath(
 		`C:\Users\HP\go\pkg\mod\github.com\yalue\onnxruntime_go@v1.31.0\test_data\onnxruntime.dll`,
 	)
@@ -30,14 +23,13 @@ func InitModel() error {
 		panic(err)
 	}
 
-	Session, err = ort.NewDynamicAdvancedSession(
+	return ort.NewDynamicAdvancedSession(
 		"D:/side_projects/video-app/go-search/modelsmodel.onnx",
 		[]string{"user_ids", "item_ids"},
 		[]string{"scores"},
 		nil,
 	)
 
-	return err
 }
 
 func main() {
@@ -49,9 +41,17 @@ func main() {
 		log.Fatal("PORT is not found in the environment")
 	}
 
-	err := InitModel()
+	session, err := InitModel()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	rec := &recommendation.Recommender{
+		Session: session,
+	}
+
+	h := &handler.Handler{
+		Recommender: rec,
 	}
 
 	router := chiNewRouter()
@@ -66,11 +66,24 @@ func main() {
 	}))
 
 	v1Router := chi.NewRouter()
-	router.Mount("/v1", v1Router)
 
 	v1Router.Get("/health", handler.HandlerReadiness)
 	v1Router.Get("/err", handler.HandlerErr)
 
-	v1Router.Post("/recommendations", handler.HandlerRecommendation)
+	v1Router.Post("/recommendations", h.HandlerRecommendation)
+
+	router.Mount("/v1", v1Router)
+
+	srv := &http.Server{
+		Handler: router,
+		Addr:    ":" + port,
+	}
+
+	log.Printf("Server starting on %v", srv.Addr)
+
+	err = srv.ListenAndServe()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }
